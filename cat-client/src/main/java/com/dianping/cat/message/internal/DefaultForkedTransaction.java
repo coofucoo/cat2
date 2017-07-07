@@ -25,7 +25,7 @@ public class DefaultForkedTransaction extends DefaultTransaction implements Fork
 
 			// Detach parent transaction and this forked transaction, by calling linkAsRunAway(), at this earliest moment,
 			// so that thread synchronization is not needed at all between them in the future.
-			m_forkedMessageId = Cat.createMessageId();
+			m_forkedMessageId = Cat.getProducer().createMessageId();
 		}
 	}
 

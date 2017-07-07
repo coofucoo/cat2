@@ -16,6 +16,10 @@
       </dependency>
       <dependency>
          <groupId>org.unidal.framework</groupId>
+         <artifactId>dal-jdbc</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.unidal.framework</groupId>
          <artifactId>web-framework</artifactId>
          <scope>provided</scope>
       </dependency>
@@ -86,9 +90,9 @@
                      <goal>dal-jdbc</goal>
                   </goals>
                   <configuration>
-                     <manifest><![CDATA[
-                        ${basedir}/src/main/resources/META-INF/dal/jdbc/config-manifest.xml,
-                     ]]></manifest>
+                     <manifest><![CDATA[,
+                        ${basedir}/src/main/resources/META-INF/dal/jdbc/system-manifest.xml,
+                     ,]]></manifest>
                   </configuration>
                </execution>
             </executions>

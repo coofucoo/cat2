@@ -46,16 +46,20 @@ public class DefaultTransaction extends AbstractMessage implements Transaction {
 	public void complete() {
 		try {
 			if (isCompleted()) {
-				// complete() was called more than once
-				DefaultEvent event = new DefaultEvent("cat", "BadInstrument");
-
-				event.setStatus("TransactionAlreadyCompleted");
-				event.complete();
-				addChild(event);
+				// DefaultEvent event = new DefaultEvent("cat", "BadInstrument");
+				//
+				// event.setStatus("TransactionAlreadyCompleted");
+				// event.complete();
+				// addChild(event);
 			} else {
-				m_durationInMicro = (System.nanoTime() - m_durationStart) / 1000L;
-
+				if (m_durationInMicro == -1) {
+					m_durationInMicro = (System.nanoTime() - m_durationStart) / 1000L;
+				}
 				setCompleted(true);
+
+				if (m_manager != null && isProblem(this, m_type, m_durationInMicro / 1000L)) {
+					m_manager.getThreadLocalMessageTree().setDiscard(false);
+				}
 
 				if (m_manager != null) {
 					m_manager.end(this);
@@ -113,6 +117,25 @@ public class DefaultTransaction extends AbstractMessage implements Transaction {
 		return m_children != null && m_children.size() > 0;
 	}
 
+	private boolean isProblem(Transaction t, String type, long duration) {
+		if (t.isSuccess()) {
+			if (type.startsWith("Squirrel.") || type.startsWith("Cellar.") || type.startsWith("Cache.")) {
+				return duration > 25;
+			} else if ("PigeonCall".equals(type) || "OctoCall".equals(type) || "Call".equals(type)) {
+				return duration > 100;
+			} else if ("PigeonService".equals(type) || "OctoService".equals(type) || "Service".equals(type)) {
+				return duration > 100;
+			} else if ("SQL".equals(type)) {
+				return duration > 100;
+			} else if ("URL".equals(type)) {
+				return duration > 1000;
+			}
+			return false;
+		} else {
+			return true;
+		}
+	}
+
 	@Override
 	public boolean isStandalone() {
 		return m_standalone;
@@ -126,12 +149,18 @@ public class DefaultTransaction extends AbstractMessage implements Transaction {
 		m_durationInMicro = duration * 1000L;
 	}
 
+	public void setDurationStart(long durationStart) {
+		m_durationStart = durationStart;
+	}
+
 	public void setStandalone(boolean standalone) {
 		m_standalone = standalone;
 	}
 
-	public void setDurationStart(long durationStart) {
-		m_durationStart = durationStart;
+	@Override
+	public void setStatus(Throwable e) {
+		m_status = e.getClass().getName();
+		m_manager.getThreadLocalMessageTree().setDiscard(false);
 	}
 
 }

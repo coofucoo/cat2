@@ -1,40 +1,138 @@
 <plexus>
 	<components>
 		<component>
-			<role>org.unidal.cat.core.alert.AlertConfiguration</role>
-			<implementation>org.unidal.cat.core.alert.internals.DefaultAlertConfiguration</implementation>
+			<role>org.unidal.initialization.Module</role>
+			<role-hint>cat-core-alert</role-hint>
+			<implementation>org.unidal.cat.core.alert.CatAlertModule</implementation>
 		</component>
 		<component>
-			<role>org.unidal.cat.core.alert.service.AlertReportBuilder</role>
-			<implementation>org.unidal.cat.core.alert.service.LocalAlertReportBuilder</implementation>
-		</component>
-		<component>
-			<role>org.unidal.cat.core.alert.service.AlertReportService</role>
-			<implementation>org.unidal.cat.core.alert.service.DefaultAlertReportService</implementation>
+			<role>org.unidal.cat.core.config.spi.ConfigStoreGroup</role>
+			<role-hint>alert</role-hint>
+			<implementation>org.unidal.cat.core.alert.config.AlertConfigStoreGroup</implementation>
 			<requirements>
 				<requirement>
-					<role>org.unidal.cat.core.alert.AlertConfiguration</role>
+					<role>org.unidal.cat.core.alert.AlertConfigDao</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>org.unidal.cat.core.alert.engine.AlertEngine</role>
-			<implementation>org.unidal.cat.core.alert.engine.DefaultAlertEngine</implementation>
+			<role>org.unidal.cat.core.alert.config.AlertConfiguration</role>
+			<implementation>org.unidal.cat.core.alert.config.DefaultAlertConfiguration</implementation>
+		</component>
+		<component>
+			<role>org.unidal.cat.core.alert.model.AlertReportBuilder</role>
+			<implementation>org.unidal.cat.core.alert.model.LocalAlertReportBuilder</implementation>
 			<requirements>
 				<requirement>
-					<role>org.unidal.cat.core.alert.AlertConfiguration</role>
+					<role>org.unidal.cat.core.alert.metric.MetricsBuilderManager</role>
 				</requirement>
 				<requirement>
-					<role>org.unidal.cat.core.alert.service.AlertReportService</role>
-				</requirement>
-				<requirement>
-					<role>org.unidal.cat.core.alert.engine.AlertRegistry</role>
+					<role>org.unidal.cat.core.alert.rule.RuleService</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>org.unidal.cat.core.alert.engine.AlertRegistry</role>
-			<implementation>org.unidal.cat.core.alert.engine.DefaultAlertRegistry</implementation>
+			<role>org.unidal.cat.core.alert.model.AlertReportService</role>
+			<implementation>org.unidal.cat.core.alert.model.DefaultAlertReportService</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.cat.core.alert.config.AlertConfiguration</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.cat.core.alert.rule.RuleService</role>
+			<implementation>org.unidal.cat.core.alert.rule.DefaultRuleService</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.cat.core.config.spi.ConfigStoreManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.cat.core.alert.rule.RuleEvaluatorManager</role>
+			<implementation>org.unidal.cat.core.alert.rule.RuleEvaluatorManager</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.cat.core.alert.rule.RuleService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.cat.core.alert.message.AlertMessageSink</role>
+			<implementation>org.unidal.cat.core.alert.message.DefaultAlertMessageSink</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.cat.core.alert.message.AlertRecipientManager</role>
+				</requirement>
+				<requirement>
+					<role>org.unidal.cat.core.alert.message.AlertSenderManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.cat.core.alert.message.AlertRecipientManager</role>
+			<implementation>org.unidal.cat.core.alert.message.DefaultAlertRecipientManager</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.cat.core.config.service.ContactorService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.cat.core.alert.message.AlertSenderManager</role>
+			<implementation>org.unidal.cat.core.alert.message.DefaultAlertSenderManager</implementation>
+		</component>
+		<component>
+			<role>org.unidal.cat.core.alert.message.AlertSender</role>
+			<role-hint>email</role-hint>
+			<implementation>org.unidal.cat.core.alert.message.EmailAlertSender</implementation>
+		</component>
+		<component>
+			<role>org.unidal.cat.core.alert.metric.MetricsBuilderManager</role>
+			<implementation>org.unidal.cat.core.alert.metric.DefaultMetricsBuilderManager</implementation>
+		</component>
+		<component>
+			<role>org.unidal.cat.core.alert.metric.MetricsEngine</role>
+			<implementation>org.unidal.cat.core.alert.metric.DefaultMetricsEngine</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.cat.core.alert.config.AlertConfiguration</role>
+				</requirement>
+				<requirement>
+					<role>org.unidal.cat.core.alert.model.AlertReportService</role>
+				</requirement>
+				<requirement>
+					<role>org.unidal.cat.core.alert.metric.MetricsDispatcher</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.cat.core.alert.metric.MetricsDispatcher</role>
+			<implementation>org.unidal.cat.core.alert.metric.DefaultMetricsDispatcher</implementation>
+		</component>
+		<component>
+			<role>org.unidal.cat.core.alert.metric.MetricsQueue</role>
+			<implementation>org.unidal.cat.core.alert.metric.DefaultMetricsQueue</implementation>
+			<instantiation-strategy>per-lookup</instantiation-strategy>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
+			<role-hint>alert-config</role-hint>
+			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
+			<configuration>
+				<physical-table-name>alert_config</physical-table-name>
+				<data-source-name>cat</data-source-name>
+			</configuration>
+		</component>
+		<component>
+			<role>org.unidal.cat.core.alert.AlertConfigDao</role>
+			<implementation>org.unidal.cat.core.alert.AlertConfigDao</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.QueryEngine</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>org.unidal.web.mvc.model.ModuleRegistry</role>
@@ -74,13 +172,34 @@
 					<role>org.unidal.cat.core.alert.page.service.JspViewer</role>
 				</requirement>
 				<requirement>
-					<role>org.unidal.cat.core.alert.service.AlertReportBuilder</role>
+					<role>org.unidal.cat.core.alert.model.AlertReportBuilder</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
 			<role>org.unidal.cat.core.alert.page.service.JspViewer</role>
 			<implementation>org.unidal.cat.core.alert.page.service.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.cat.core.alert.page.update.Handler</role>
+			<implementation>org.unidal.cat.core.alert.page.update.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.cat.core.alert.page.update.JspViewer</role>
+				</requirement>
+				<requirement>
+					<role>org.unidal.cat.core.config.spi.ConfigStoreManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.cat.core.alert.page.update.JspViewer</role>
+			<implementation>org.unidal.cat.core.alert.page.update.JspViewer</implementation>
 			<requirements>
 				<requirement>
 					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
